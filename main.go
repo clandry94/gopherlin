@@ -25,6 +25,10 @@ func perlin(curPoint Point, vectorGrid [7][7]GradientVector) float64 {
 	bl := Point{math.Floor(x), math.Ceil(y)}
 	br := Point{math.Ceil(x), math.Ceil(y)}
 
+	// Interpolation weights
+	sX := x - math.Floor(x)
+	sY := y - math.Floor(y)
+
 	// Calculate the distance vectors
 	distToUl := distVector(ul, curPoint)
 	distToUr := distVector(ur, curPoint)
@@ -37,18 +41,14 @@ func perlin(curPoint Point, vectorGrid [7][7]GradientVector) float64 {
 	dotBl := dotProd(distToBl, vectorGrid[int(bl.x)][int(bl.y)])
 	dotBr := dotProd(distToBr, vectorGrid[int(br.x)][int(br.y)])
 
-	fmt.Printf("ul: %v, %v \n", ul.x, ul.y)
-	fmt.Printf("ur: %v, %v \n", ur.x, ur.y)
-	fmt.Printf("bl: %v, %v \n", bl.x, bl.y)
-	fmt.Printf("br: %v, %v \n", br.x, br.y)
+	ix0 := linearInterpolate(dotUl, dotUr, sX)
+	ix1 := linearInterpolate(dotBl, dotBr, sX)
 
-	fmt.Println("Dot products: ")
-	fmt.Println(dotUl)
-	fmt.Println(dotUr)
-	fmt.Println(dotBl)
-	fmt.Println(dotBr)
+	return linearInterpolate(ix0, ix1, sY)
+}
 
-	return 0.0
+func linearInterpolate(a0 float64, a1 float64, w float64) float64 {
+	return ((1.0 - w) * a0) + (w * a1)
 }
 
 func dotProd(distVec Point, gradientVec GradientVector) float64 {
@@ -79,6 +79,22 @@ func createGradientVectorGrid(size int) [7][7]GradientVector {
 func main() {
 	vectorGrid := createGradientVectorGrid(7)
 	fmt.Println("Hello!")
-	testPoint := Point{2.43, 3.21}
-	perlin(testPoint, vectorGrid)
+	testPoint := Point{0.0, 0.0}
+	for i := 0; i < 600; i++ {
+		if testPoint.x >= 6.0 {
+			testPoint.x = 0
+		}
+		testPoint.y = 0.0
+		for j := 0; j < 600; j++ {
+			if testPoint.y >= 6.0 {
+				break
+			}
+			//fmt.Printf("TESTING: %v, %v with i,j = %v,%v\n", testPoint.x, testPoint.y, i, j)
+			value := perlin(testPoint, vectorGrid)
+			fmt.Printf("Perlin(%v, %v) = %v\n", testPoint.x, testPoint.y, value)
+			testPoint.y += 0.01
+		}
+		testPoint.x += 0.01
+	}
+
 }
