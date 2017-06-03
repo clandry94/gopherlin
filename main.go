@@ -1,10 +1,15 @@
 package main
 
-import "fmt"
-import "math"
-import "math/rand"
+import (
+	"encoding/csv"
+	"fmt"
+	"math"
+	"math/rand"
+	"os"
+	"strconv"
+)
 
-var r = rand.New(rand.NewSource(831994))
+var r = rand.New(rand.NewSource(219381908309281094))
 
 type Point struct {
 	x float64
@@ -80,6 +85,13 @@ func main() {
 	vectorGrid := createGradientVectorGrid(7)
 	fmt.Println("Hello!")
 	testPoint := Point{0.0, 0.0}
+	file, err := os.Create("perlin2.csv")
+	if err != nil {
+		fmt.Println("bad")
+	}
+	defer file.Close()
+	w := csv.NewWriter(file)
+
 	for i := 0; i < 600; i++ {
 		if testPoint.x >= 6.0 {
 			testPoint.x = 0
@@ -92,9 +104,15 @@ func main() {
 			//fmt.Printf("TESTING: %v, %v with i,j = %v,%v\n", testPoint.x, testPoint.y, i, j)
 			value := perlin(testPoint, vectorGrid)
 			fmt.Printf("Perlin(%v, %v) = %v\n", testPoint.x, testPoint.y, value)
+			x := strconv.FormatFloat(testPoint.x, 'f', 6, 64)
+			y := strconv.FormatFloat(testPoint.y, 'f', 6, 64)
+			val := strconv.FormatFloat(value, 'f', 6, 64)
+
+			record := []string{x, y, val}
+			w.Write(record)
 			testPoint.y += 0.01
 		}
 		testPoint.x += 0.01
 	}
-
+	w.Flush()
 }
