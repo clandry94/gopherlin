@@ -3,6 +3,9 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
+	"image"
+	"image/color"
+	"image/draw"
 	"math"
 	"math/rand"
 	"os"
@@ -92,6 +95,7 @@ func main() {
 	defer file.Close()
 	w := csv.NewWriter(file)
 
+	im := image.NewGray(image.Rectangle{Max: image.Point{X: 700, Y: 700}})
 	for i := 0; i < 600; i++ {
 		if testPoint.x >= 6.0 {
 			testPoint.x = 0
@@ -110,6 +114,9 @@ func main() {
 
 			record := []string{x, y, val}
 			w.Write(record)
+
+			//drawing
+
 			testPoint.y += 0.01
 		}
 		testPoint.x += 0.01
